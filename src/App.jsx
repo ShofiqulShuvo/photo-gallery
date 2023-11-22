@@ -1,39 +1,26 @@
 import { useEffect, useState } from 'react'
 import './App.css'
+import useFetch from './hooks/useFetch';
+import { options, url } from './api/api';
+import Image from './components/Image';
+import Button from './components/Button';
+import InputGroupCheckBox from './components/InputGroupCheckBox';
 
 function App() {
 
-  const [images, setImages] = useState([])
+  const { isLoading, error, data } = useFetch(url, options);
+
+  const [images, setImages] = useState([]);
   const [selectedImagesId, setSelectedImagesId] = useState([])
 
-  const url = 'https://pexelsdimasv1.p.rapidapi.com/v1/curated?per_page=15&page=1';
-  const options = {
-    method: 'GET',
-    headers: {
-      Authorization: 'oOZgMYs6067KP8FXncSbYMwnyzxJkNE1ZLFjNLBQiNtXLjB7dbp4c76d', /* goes into env variable */
-      'X-RapidAPI-Key': '9297fea8a1mshd789ee9e3c02816p162c6ejsnfdb57fc08fe6',
-      'X-RapidAPI-Host': 'PexelsdimasV1.p.rapidapi.com'
+  useEffect(() => {
+    if(data) {
+      setImages(data.photos)
     }
-  };
-
-  const fetchData = async (url, options) => {
-    try {
-      const response = await fetch(url, options);
-      const result = await response.json();
-      setImages(result)
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  useEffect( () => {
-
-    fetchData(url, options)
-  }, [])
+  }, [data])
 
   // select check box
   const handleChange = (id) => {
-    
     if(!selectedImagesId.some(prevId => prevId === id)) {
       setSelectedImagesId(prevIds => {
         return [...prevIds, id]
@@ -46,11 +33,30 @@ function App() {
 
   }
 
+
+  // delete items
   const handleDelete = () => {
 
-    setImages(prevImages => {
-      return prevImages.filter(image => selectedImagesId.includes(image.id))
-    })
+    if(images) {
+      setImages(prevImages => {
+        return prevImages.filter(img => !selectedImagesId.includes(img.id))
+      })
+
+      setSelectedImagesId([])
+    }
+
+  }
+
+
+  // if loading
+  if(isLoading) {
+    return
+  }
+
+  // if error
+  if(error) {
+    console.log(error)
+    return
   }
 
   return (
@@ -58,33 +64,43 @@ function App() {
     <div className='app-wraper'>
 
       <div className="header">
-        Click on Image For Select
-      </div>
+        <div className="container">
 
-      <div className="container">
+          <p className='select-count'> 
+            Total Selected: <span>{selectedImagesId.length}</span>
+          </p>
 
-        <button className='delete-btn' onClick={handleDelete}>
-          delete selected
-        </button>
+          <Button btnText={"delete selected"} cssClass={'delete-btn'} submitEvent={handleDelete} /> 
 
-        <div className='photo-gallery'>
-          {images.length > 0 && (
-            images.photos.map((photo) => {
-              const { id, src } = photo
-
-              return (
-                <div key={id} className="photo-container">
-                  <label className='select-input-lebel' htmlFor={`${id}`}>a</label>
-                  <input id={`${id}`} className='select-input' type="checkbox" checked={selectedImagesId.includes(id)} onChange={() => handleChange(id)}  />
-                  <img  src={src.landscape} />
-                </div>
-              )
-            })
-
-          )}
         </div>
-
       </div>
+
+      <main>
+        <div className="container">
+
+
+          <div className='photo-gallery'>
+            {
+              images.map((photo) => {
+                const { id, src } = photo
+
+                return (
+                  <div key={id} className="photo-container">
+
+                    <div className="bg-overlay"></div>
+
+                    <InputGroupCheckBox inputGroupClass={'input-group'} labelClass={'select-input-lebel'} lebelText={""} inputId={`${id}`} inputClassName={'select-input'} checked={selectedImagesId.includes(id)} onChange={() => handleChange(id)}  />
+
+                    <Image imgSrc={src.landscape} />
+                  </div>
+                )
+              })
+
+            }
+          </div>
+
+        </div>
+      </main>
     </div>
     </>
   )
