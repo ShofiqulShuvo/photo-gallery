@@ -73,15 +73,23 @@ function Main() {
       <div className="app-wraper">
           <div className="header">
             <div className="container">
-              <p className="select-count">
-                Total Selected: <span>{selectedImagesId.length}</span>
-              </p>
+              {
+                selectedImagesId.length ? (
+                  <p className="select-count">
+                    Total Selected: <span>{selectedImagesId.length}</span>
+                  </p>
+                ) : (
+                  <p className="select-count">
+                    Image Gallery
+                  </p>
+                )
+              }
 
-              <Button
+              {selectedImagesId.length? (<Button
                 btnText={"delete selected"}
                 cssClass={"delete-btn"}
                 submitEvent={handleDelete}
-              />
+              />) : null}
             </div>
           </div>
 
