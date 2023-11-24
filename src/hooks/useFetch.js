@@ -16,7 +16,11 @@ const useFetch = (url, options) => {
           const response = await fetch(url, options);
           const result = await response.json();
           setIsLoading(false)
-          setData(result)
+          if(!response.ok) {
+            throw new Error(response);
+          }else {
+            setData(result)
+          }
         } catch (error) {
             setIsLoading(false)
             setError(error)

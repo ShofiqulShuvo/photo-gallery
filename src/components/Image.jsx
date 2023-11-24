@@ -1,12 +1,15 @@
 
 
+
 const Image = (props) => {
 
-    const {imgSrc, alt} = props
+    const {imgSrc, alt } = props;
+
+    
 
   return (
     <>
-        <img  src={imgSrc} alt={alt} />
+        <img src={imgSrc} alt={alt} />
     </>
   )
 }
